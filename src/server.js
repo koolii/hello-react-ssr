@@ -9,13 +9,23 @@ const app = express()
 app.get('/', (req, res) => {
   // client.jsの中身をserver側で実装する
   const now = new Date()
-  const contentsHTML = ReactDOMServer.renderToString(
-    <App renderedAt={now} />
+  // React v15
+  // const contentsHTML = ReactDOMServer.renderToString(
+  //   <App renderedAt={now} />
+  // )
+  // const fullHTML = ReactDOMServer.renderToStaticMarkup(
+  //   <HTML contents={contentsHTML} />
+  // )
+  // res.send(fullHTML)
+
+  // React v16
+  // Node.jsのStreamを出力
+  const stream = ReactDOMServer.renderToNodeStream(
+    <HTML now={now}>
+      <App renderedAt={now} />
+    </HTML>
   )
-  const fullHTML = ReactDOMServer.renderToStaticMarkup(
-    <HTML contents={contentsHTML} />
-  )
-  res.send(fullHTML)
+  stream.pipe(res)
 })
 
 app.get('/client.bundle.js', (req, res) => {
@@ -27,7 +37,8 @@ app.listen(3000, () => {
   console.log('Starting ssr server.')
 })
 
-function HTML({ contents }) {
+// contents => children
+function HTML({ now, children }) {
   return (
     <html lang="ja">
       <head>
@@ -35,7 +46,11 @@ function HTML({ contents }) {
         <title>Simple Server Side Rendering Application</title>
       </head>
       <body>
-        <div id="root" dangerouslySetInnerHTML={{ __html: contents }}></div>
+        {/*
+          // React v15
+          <div id="root" dangerouslySetInnerHTML={{ __html: contents }}></div>
+        */}
+        <div id="root">{children}</div>
         {/* /client.bundle.js のURLにGETリクエスト */}
         <script src="client.bundle.js"></script>
       </body>

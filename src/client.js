@@ -4,7 +4,7 @@ import App from './App'
 
 const now = new Date()
 
-ReactDOM.render(
+ReactDOM.hydrate(
   <App renderedAt={now} />,
   document.getElementById('root')
 )
